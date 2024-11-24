@@ -1,0 +1,52 @@
+server:
+    # -------- Paths
+    logfile: "{{ unbound.logfile_path }}"
+    verbosity: {{ unbound.verbosity | default(0) }}
+    root-hints: "{{ unbound.root_hints_path }}"
+
+    # -------- Interfaces
+{% for interface in unbound.interfaces %}
+    interface: {{ interface }}
+{% endfor %}
+    port: {{ unbound.port }}
+
+    do-udp: yes
+    do-tcp: yes
+
+    do-ip4: yes
+    do-ip6: {{ unbound.do_ip6 | default('no') }}
+    prefer-ip6: {{ unbound.prefer_ip6 | default('no') }}
+
+    # -------- Limits and performance
+    edns-buffer-size: 1232
+    so-rcvbuf: 1m
+    num-threads: {{ unbound.num_threads | default(1) }}
+    ratelimit: {{ unbound.ratelimit | default(1000) }}
+    ip-ratelimit: {{ unbound.ip_ratelimit | default(1000) }}
+
+    # -------- Caching
+    prefetch: yes
+    cache-max-ttl: {{ unbound.cache_max_ttl | default(86400) }}
+    cache-min-ttl: {{ unbound.cache_min_ttl | default(3600) }}
+
+    # -------- Security
+    tls-cert-bundle: "/etc/ssl/certs/ca-certificates.crt"
+
+    harden-glue: yes
+
+    # Enable DNSSEC.
+    val-permissive-mode: no
+    auto-trust-anchor-file: "{{ unbound.trust_anchor_path }}"
+    harden-dnssec-stripped: yes
+
+    # Don't use capitalization randomization as it known to cause DNSSEC issues sometimes
+    # see https://discourse.pi-hole.net/t/unbound-stubby-or-dnscrypt-proxy/9378 for further details.
+    use-caps-for-id: no
+
+    # -------- Privacy
+    qname-minimisation: yes
+
+    # Ensure privacy of local IP ranges
+{% for address in unbound.private_addresses %}
+    private-address: {{ address }}
+{% endfor %}

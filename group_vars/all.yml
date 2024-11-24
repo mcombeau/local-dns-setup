@@ -1,0 +1,38 @@
+unbound:
+  port: 5335
+  conf_path: /etc/unbound/unbound.conf
+  root_hints_path: /var/lib/unbound/root.hints
+  trust_anchor_path: /var/lib/unbound/root.key
+  logfile_path: /var/log/unbound/unbound.log
+  verbosity: 0
+  do_ip6: 'yes'
+  prefer_ip6: 'yes'
+  cache_max_ttl: 86400
+  cache_min_ttl: 3600
+  ratelimit: 1000
+  ip_ratelimit: 1000
+  num_threads: 1
+  interfaces:
+    - 127.0.0.1
+    - ::1
+  private_addresses:
+    - 192.168.0.0/16
+    - 169.254.0.0/16
+    - 172.16.0.0/12
+    - 10.0.0.0/8
+    - fd00::/8
+    - fe80::/10
+
+pihole:
+  interface: eth0
+  cache_size: 1000
+  web_password: "{{ lookup('env', 'PIHOLE_WEB_PASSWORD') | default('') }}"
+  webtheme: high-contrast-dark
+  webuiboxedlayout: boxed
+  dnsmasq_listening: local
+  dns_1: "{{ unbound.interfaces[0] | default('127.0.0.1') }}#{{ unbound.port }}"
+  dns_2: 1.1.1.1
+  dns_3: "{{ unbound.interfaces[1] | default('::1') }}#{{ unbound.port }}"
+  dns_4: 2606:4700:4700::1001
+  dnssec: false
+  rev_server: false

@@ -1,0 +1,17 @@
+version: '3'
+
+env:
+  file: .env
+
+tasks:
+  deploy:
+    desc: "Deploy Ansible playbook for local DNS setup"
+    cmds:
+      - export $(grep -v '^#' .env | xargs) &&
+        ansible-playbook -i inventories/hosts.yml bootstrap-dns.yml
+
+  deploy:*:
+    desc: "Deploy Ansible role for local DNS setup (tags: system, unbound, pihole)"
+    cmds:
+      - export $(grep -v '^#' .env | xargs) &&
+        ansible-playbook -i inventories/hosts.yml bootstrap-dns.yml -t {{index .MATCH 0}}

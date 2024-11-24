@@ -1,0 +1,52 @@
+---
+- name: Install Unbound
+  ansible.builtin.apt:
+    name:
+      - unbound
+      - unbound-anchor
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Always download the latest root hints file
+  ansible.builtin.get_url:
+    url: https://www.internic.net/domain/named.root
+    dest: "{{ unbound.root_hints_path }}"
+    mode: '0644'
+    force: yes
+
+- name: Ensure Unbound log directory
+  ansible.builtin.file:
+    path: /var/log/unbound
+    state: directory
+    owner: unbound
+    group: unbound
+    mode: '0755'
+
+- name: Verify and update trust anchor
+  ansible.builtin.command:
+    unbound-anchor -a "{{ unbound.trust_anchor_path }}"
+  register: unbound_check
+  changed_when: false
+  failed_when: unbound_check.rc != 0
+    
+- name: Deploy Unbound configuration
+  ansible.builtin.template:
+    src: unbound.conf.j2
+    dest: "{{ unbound.conf_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Validate Unbound configuration
+  ansible.builtin.command:
+    cmd: unbound-checkconf "{{ unbound.conf_path }}"
+  register: unbound_check
+  changed_when: false
+  failed_when: unbound_check.rc != 0
+
+- name: Restart Unbound service
+  ansible.builtin.service:
+    name: unbound
+    state: restarted
+    enabled: true
