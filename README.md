@@ -58,14 +58,16 @@ Once the installation is done, you can access the Pi-Hole dashboard by visiting 
 
 You can find configuration settings for both Unbound and Pi-Hole in `group_vars/all.yml`.
 
-Pihole will listen on port 53 of the machine for DNS queries and will forward them to Unbound running on port 5335.
+By default, Pi-Hole will listen on port 53 of the machine for DNS queries and will forward them to Unbound running on port 5335.
+
+If you wish to make this the primary DNS resolver on your network, you will have to go into your router and set the DNS servers in your DHCP settings to the host IPs where you installed Pi-Hole and Unbound.
 
 ## Testing
 
 To test this is working, take the domain name of one of the hosts you've run the script on and run a `dig` on it:
 
 ```bash
-dig @host_domain_name_or_ip example.org
+dig @host_ip example.org
 ```
 
 You should get a valid response.
@@ -73,7 +75,7 @@ You should get a valid response.
 You can also test a domain whose DNSSEC is invalid:
 
 ```bash
-dig @host_domain_name_or_ip dnssec-failed.org
+dig @host_ip dnssec-failed.org
 ```
 
 This should return a SERVFAIL response.
@@ -81,7 +83,7 @@ This should return a SERVFAIL response.
 A domain blocked by Pi-Hole should return a dummy response of 0.0.0.0 (you can test any domain in the [default blocklist](https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts)):
 
 ```bash
-dig @host_domain_name_or_ip ad-assets.futurecdn.net
+dig @host_ip ad-assets.futurecdn.net
 ```
 
 ---
