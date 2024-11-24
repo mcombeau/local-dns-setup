@@ -31,10 +31,6 @@
   args:
     creates: /etc/pihole/pihole-FTL.conf
 
-- name: Debug Pi-hole web password
-  ansible.builtin.debug:
-    msg: "The Pi-hole password is {{ pihole.web_password }}"
-
 - name: Reset Pi-hole web interface password
   ansible.builtin.shell: |
     pihole -a -p "{{ pihole.web_password | default('') }}"
